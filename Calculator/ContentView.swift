@@ -50,6 +50,7 @@ struct ContentView: View {
     @State var value = "0"
     @State var runningNumber = 0
     @State var currenOperation: Operation = .none
+    @State var hasError = false
     
     let buttons: [[CalcButton]] = [
         [.clear, .divide],
@@ -96,6 +97,9 @@ struct ContentView: View {
         }
     }
     func didTap(button: CalcButton) {
+        if hasError && button != .clear {
+            return
+        }
         switch button {
         case .add, .subtract, .multiply, .divide, .equal:
             if button == .add {
@@ -121,7 +125,13 @@ struct ContentView: View {
                 case .add: self.value = "\(runningValue + currentValue)"
                 case .subtract: self.value = "\(runningValue - currentValue)"
                 case .multiply: self.value = "\(runningValue * currentValue)"
-                case .divide: self.value = "\(runningValue / currentValue)"
+                case .divide:
+                    if currentValue == 0 {
+                        self.value = "Error"
+                        self.hasError = true
+                    } else {
+                        self.value = "\(runningValue / currentValue)"
+                    }
                 case .none:
                     break
                 }
@@ -132,7 +142,8 @@ struct ContentView: View {
             
         case .clear:
             self.value = "0"
-            break
+            self.hasError = false
+            
         case .decimal:
             break
         default:
